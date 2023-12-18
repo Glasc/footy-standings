@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { useState, useEffect, type FormEvent } from "react";
+import { Combobox } from "~/components/combo-box";
 import { columns } from "~/components/table/columns";
 import { DataTable } from "~/components/table/data-table";
 import { Button } from "~/components/ui/button";
@@ -38,7 +39,15 @@ export default function Home() {
   const { selectedLeague, standings, leagues, handleSubmit } =
     useSelectedLeague();
   const tableData = api.standings.getTableInfo.useQuery();
-  if (standings.isLoading || tableData.isLoading) return <div>Loading...</div>;
+  const comboData = leagues.data?.data.map((league) => {
+    return {
+      value: league.name.toLowerCase(),
+      label: league.name,
+      id: league.id as `${string}.${number}`,
+    };
+  });
+  if (standings.isLoading || tableData.isLoading || !comboData)
+    return <div>Loading...</div>;
   return (
     <>
       <Head>
@@ -50,26 +59,7 @@ export default function Home() {
         <div className="flex grid-cols-2 gap-4 pt-6 sm:gap-2">
           <form className="w-full max-w-sm" onSubmit={handleSubmit}>
             <h1 className="text-2xl font-bold">{standings.data?.data.name}</h1>
-            {/* TODO: DEFAULT LEAGUE */}
-            <RadioGroup name="league" className="mt-4 flex flex-col ">
-              {leagues.data?.data.map((league) => (
-                <div
-                  key={league.id}
-                  className="flex items-center space-x-2 text-base"
-                >
-                  <RadioGroupItem value={league.id} id={league.name} />
-                  <Label
-                    className="py-1 text-base font-normal text-muted-foreground"
-                    htmlFor={league.name}
-                  >
-                    {league.name}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            <Button className="mt-4 w-full max-w-xs" variant="default">
-              Submit
-            </Button>
+            <Combobox leagues={comboData} />
           </form>
           <div className="">
             {selectedLeague

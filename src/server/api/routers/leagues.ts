@@ -209,7 +209,7 @@ const leagues = {
   ]
 }
 
-type LeaguesRoot = typeof leagues
+export type Leagues = typeof leagues
 
 export const leaguesRouter = createTRPCRouter({
   getLeagues: publicProcedure.query(async () => {
