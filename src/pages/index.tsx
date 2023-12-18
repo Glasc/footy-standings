@@ -4,10 +4,9 @@ import { useState, useEffect, type FormEvent } from "react";
 import { columns } from "~/components/table/columns";
 import { DataTable } from "~/components/table/data-table";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { StandingColumn } from "~/shared/types";
+import { type StandingColumn } from "~/shared/types";
 import { api } from "~/utils/api";
 
 const useSelectedLeague = () => {
@@ -40,7 +39,6 @@ export default function Home() {
     useSelectedLeague();
   const tableData = api.standings.getTableInfo.useQuery();
   if (standings.isLoading || tableData.isLoading) return <div>Loading...</div>;
-
   return (
     <>
       <Head>
@@ -61,7 +59,7 @@ export default function Home() {
                 >
                   <RadioGroupItem value={league.id} id={league.name} />
                   <Label
-                    className="py-1 font-normal text-base text-muted-foreground"
+                    className="py-1 text-base font-normal text-muted-foreground"
                     htmlFor={league.name}
                   >
                     {league.name}
@@ -69,16 +67,15 @@ export default function Home() {
                 </div>
               ))}
             </RadioGroup>
-            <Button className="mt-4 w-full max-w-xs" variant="default">Submit</Button>
+            <Button className="mt-4 w-full max-w-xs" variant="default">
+              Submit
+            </Button>
           </form>
           <div className="">
             {selectedLeague
               ? (() => {
-                  const cols = tableData.data?.cols as StandingColumn;
                   const rows = tableData.data?.rows ?? [];
-                  return (
-                    <DataTable columns={cols} data={rows} />
-                  );
+                  return <DataTable columns={columns} data={rows} />;
                 })()
               : null}
           </div>
