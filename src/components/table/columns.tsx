@@ -1,22 +1,11 @@
 import { type Column, type ColumnDef } from "@tanstack/react-table";
 import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
-import { STATIC_PROPS_ID } from "next/dist/shared/lib/constants";
-
-export type StandingRow = {
-  club: string;
-  GP: number;
-  L: number;
-  GD: number;
-  P: number;
-  A: number;
-  F: number;
-  D: number;
-  W: number;
-};
+import Image from "next/image";
+import { type Row } from "~/server/api/routers/standings";
 
 const createSortableHeader = (
-  column: Column<StandingRow, unknown>,
+  column: Column<Row, unknown>,
   nameToDisplay: string | number,
   customName?: string,
 ) => {
@@ -34,7 +23,7 @@ const createSortableHeader = (
   );
 };
 
-export const columns: ColumnDef<StandingRow, unknown>[] = [
+export const columns: ColumnDef<Row, unknown>[] = [
   {
     accessorKey: "R",
     header: ({ column }) => createSortableHeader(column, "Rank"),
@@ -42,6 +31,19 @@ export const columns: ColumnDef<StandingRow, unknown>[] = [
   {
     accessorKey: "club",
     header: ({ column }) => createSortableHeader(column, "Club"),
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center space-x-1">
+          <Image
+            width={30}
+            height={30}
+            alt="temp"
+            src={row.original.club_img.href}
+          />
+          <div>{row.original.club}</div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "W",

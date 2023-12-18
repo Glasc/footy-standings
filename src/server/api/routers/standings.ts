@@ -1,10 +1,17 @@
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { z } from "zod";
-import { StandingsRoot } from "~/shared/types";
+import { type StandingsRoot } from "~/shared/types";
 import standings from "../../../mock/standings.json";
 
-type Row = {
+export type Row = {
   club: string;
+  club_img: {
+    href: string;
+    width: number;
+    height: number;
+    alt: string;
+    rel: string[];
+    lastUpdated: string;
+  };
   GP: number;
   L: number;
   GD: number;
@@ -34,7 +41,11 @@ export const standingsRouter = createTRPCRouter({
       const stats = standing.stats.reduce((acc, stat) => {
         return { ...acc, [stat.abbreviation]: stat.value };
       }, {});
-      return { club: standing.team.displayName, ...stats };
+      return {
+        club: standing.team.displayName,
+        club_img: standing.team.logos[0],
+        ...stats,
+      };
     });
     return {
       rows: rows as Row[],
