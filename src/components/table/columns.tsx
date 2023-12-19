@@ -33,10 +33,10 @@ export const columns: ColumnDef<Row, unknown>[] = [
     header: ({ column }) => createSortableHeader(column, "Club"),
     cell: ({ row }) => {
       return (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
           <Image
-            width={30}
-            height={30}
+            width={25}
+            height={25}
             alt="temp"
             src={row.original.club_img.href}
           />

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
@@ -17,18 +15,25 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import Image from "next/image";
 
-type ComboboxProps = {
+type LeagueComboBoxProps = {
   leagues: {
     value: string;
     label: string;
     id: `${string}.${number}`;
+    img_url: string | undefined;
   }[];
+  seasonInput: string;
+  setSeasonInput: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export function Combobox({ leagues }: ComboboxProps) {
+export function LeagueComboBox({
+  leagues,
+  seasonInput: value,
+  setSeasonInput: setValue,
+}: LeagueComboBoxProps) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -51,6 +56,7 @@ export function Combobox({ leagues }: ComboboxProps) {
           <CommandGroup>
             {leagues.map((league) => (
               <CommandItem
+                className="space-x-2"
                 key={league.value}
                 value={league.value}
                 onSelect={() => {
@@ -58,7 +64,15 @@ export function Combobox({ leagues }: ComboboxProps) {
                   setOpen(false);
                 }}
               >
-                {league.label}
+                {league.img_url ? (
+                  <Image
+                    width={30}
+                    height={30}
+                    alt="temp"
+                    src={league.img_url}
+                  />
+                ) : null}
+                <span>{league.label}</span>
                 <CheckIcon
                   className={cn(
                     "ml-auto h-4 w-4",

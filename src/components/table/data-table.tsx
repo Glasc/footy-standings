@@ -3,7 +3,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  SortingState,
+  type SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table";
 
@@ -41,7 +41,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md border">
-      <Table className="text-lg">
+      <Table className="text-base font-medium">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -69,21 +69,6 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => {
-                    if (cell.column.id === "club") {
-                      const imgHref = (
-                        cell.row.original?.club_img as { href?: string }
-                      )?.href;
-                      return (
-                        <>
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        </>
-                      );
-                    }
                     return (
                       <TableCell key={cell.id}>
                         {flexRender(
