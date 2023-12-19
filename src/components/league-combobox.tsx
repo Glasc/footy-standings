@@ -16,6 +16,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 type LeagueComboBoxProps = {
   leagues: {
@@ -24,16 +26,14 @@ type LeagueComboBoxProps = {
     id: `${string}.${number}`;
     img_url: string | undefined;
   }[];
-  seasonInput: string;
-  setSeasonInput: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export function LeagueComboBox({
-  leagues,
-  seasonInput: value,
-  setSeasonInput: setValue,
-}: LeagueComboBoxProps) {
+export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const value = router.query.leagueId;
+  const selectedLeague = leagues.find((league) => league.id === value);
+  const leagueLabel = selectedLeague?.label;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -41,46 +41,48 @@ export function LeagueComboBox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[400px] justify-between  font-semibold sm:text-xl"
         >
-          {value
-            ? leagues.find((league) => league.id === value)?.label
-            : "Select league..."}
+          {value ? <span>{leagueLabel}</span> : "Select league..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[300px] p-0">
         <Command>
           <CommandInput placeholder="Search league..." className="h-9" />
           <CommandEmpty>No league found.</CommandEmpty>
           <CommandGroup>
-            {leagues.map((league) => (
-              <CommandItem
-                className="space-x-2"
-                key={league.value}
-                value={league.value}
-                onSelect={() => {
-                  setValue(league.id === value ? "" : league.id);
-                  setOpen(false);
-                }}
-              >
-                {league.img_url ? (
-                  <Image
-                    width={30}
-                    height={30}
-                    alt="temp"
-                    src={league.img_url}
-                  />
-                ) : null}
-                <span>{league.label}</span>
-                <CheckIcon
-                  className={cn(
-                    "ml-auto h-4 w-4",
-                    value === league.value ? "opacity-100" : "opacity-0",
-                  )}
-                />
-              </CommandItem>
-            ))}
+            {leagues.map((league) => {
+              const currentYear = new Date().getFullYear();
+              return (
+                <Link href={`/${league.id}/${currentYear}`} key={league.value}>
+                  <CommandItem
+                    className="space-x-2 font-medium"
+                    key={league.value}
+                    value={league.value}
+                    onSelect={() => {
+                      setOpen(false);
+                    }}
+                  >
+                    {league.img_url ? (
+                      <Image
+                        width={30}
+                        height={30}
+                        alt="temp"
+                        src={league.img_url}
+                      />
+                    ) : null}
+                    <span>{league.label}</span>
+                    <CheckIcon
+                      className={cn(
+                        "ml-auto h-4 w-4",
+                        value === league.value ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                </Link>
+              );
+            })}
           </CommandGroup>
         </Command>
       </PopoverContent>

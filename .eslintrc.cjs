@@ -32,6 +32,12 @@ const config = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ["*.ts", "*.tsx"],
+      parser: "@typescript-eslint/parser",
+    },
+  ],
 };
 
 module.exports = config;

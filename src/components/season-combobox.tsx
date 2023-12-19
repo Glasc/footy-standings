@@ -15,22 +15,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 type SeasonComboBoxProps = {
   seasons: {
     value: string;
     label: `${number}-${number}`;
   }[];
-  leagueInput: string;
-  setLeagueInput: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export function SeasonComboBox({
-  seasons,
-  leagueInput: value,
-  setLeagueInput: setValue,
-}: SeasonComboBoxProps) {
+export function SeasonComboBox({ seasons }: SeasonComboBoxProps) {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const value = router.query.season;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -38,7 +36,7 @@ export function SeasonComboBox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-auto max-w-[400px] justify-between text-base  font-semibold sm:text-xl"
         >
           {value
             ? seasons.find((season) => season.value === value)?.label
@@ -51,25 +49,30 @@ export function SeasonComboBox({
           <CommandInput placeholder="Search season..." className="h-9" />
           <CommandEmpty>No season found.</CommandEmpty>
           <CommandGroup>
-            {seasons.map((season) => (
-              <CommandItem
-                id={season.value}
-                key={season.value}
-                value={season.value}
-                onSelect={(currentValue) => {
-                  setValue(currentValue === value ? "" : currentValue);
-                  setOpen(false);
-                }}
-              >
-                {season.label}
-                <CheckIcon
-                  className={cn(
-                    "ml-auto h-4 w-4",
-                    value === season.value ? "opacity-100" : "opacity-0",
-                  )}
-                />
-              </CommandItem>
-            ))}
+            {seasons.map((season) => {
+              const prev = router.query.leagueId as string;
+              return (
+                <Link href={`/${prev}/${season.value}`} key={season.value}>
+                  <CommandItem
+                    className="text-base font-medium text-foreground"
+                    id={season.value}
+                    key={season.value}
+                    value={season.value}
+                    onSelect={() => {
+                      setOpen(false);
+                    }}
+                  >
+                    {season.label}
+                    <CheckIcon
+                      className={cn(
+                        "ml-auto h-4 w-4",
+                        value === season.value ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                </Link>
+              );
+            })}
           </CommandGroup>
         </Command>
       </PopoverContent>

@@ -1,7 +1,4 @@
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { z } from "zod";
-import { StandingsRoot } from "~/shared/types";
-import standings from "../../../mock/standings.json";
 
 const leagues = {
   status: true,
@@ -218,6 +215,7 @@ export const leaguesRouter = createTRPCRouter({
       "https://api-football-standings.azharimm.dev/leagues",
     );
     const leagues = (await response.json()) as Leagues;
+    const exceptions = new Set(["idn.1", "mys.1", "sgp.1", "tha.1", "uga.1"]);
     const comboData = leagues.data.map((league) => {
       return {
         value: league.name.toLowerCase(),
@@ -225,7 +223,7 @@ export const leaguesRouter = createTRPCRouter({
         id: league.id as `${string}.${number}`,
         img_url: league.logos.dark ?? undefined,
       };
-    });
+    }).filter(league => !exceptions.has(league.id));
     return { leagues, comboData };
   }),
 });

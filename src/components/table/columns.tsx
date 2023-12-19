@@ -12,7 +12,7 @@ const createSortableHeader = (
   const props = customName ? { title: customName } : {};
   return (
     <Button
-      className="p-0"
+      className="p-0 text-lg font-semibold"
       variant="ghost"
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       {...props}
@@ -35,8 +35,8 @@ export const columns: ColumnDef<Row, unknown>[] = [
       return (
         <div className="flex items-center space-x-2">
           <Image
-            width={25}
-            height={25}
+            width={30}
+            height={30}
             alt="temp"
             src={row.original.club_img.href}
           />
@@ -44,6 +44,10 @@ export const columns: ColumnDef<Row, unknown>[] = [
         </div>
       );
     },
+  },
+  {
+    accessorKey: "GP",
+    header: ({ column }) => createSortableHeader(column, "GP", "Games Played"),
   },
   {
     accessorKey: "W",
@@ -70,12 +74,9 @@ export const columns: ColumnDef<Row, unknown>[] = [
     header: ({ column }) =>
       createSortableHeader(column, "GD", "Goal Difference"),
   },
+
   {
     accessorKey: "P",
     header: ({ column }) => createSortableHeader(column, "Points"),
-  },
-  {
-    accessorKey: "GP",
-    header: ({ column }) => createSortableHeader(column, "GP", "Games Played"),
   },
 ];

@@ -1,4 +1,3 @@
-import { z } from "zod";
 export interface StandingsRoot {
   data: Data;
   status: boolean;
