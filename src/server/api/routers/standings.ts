@@ -70,6 +70,11 @@ export const standingsRouter = createTRPCRouter({
         leagueName: standings.data.name,
       };
       if (currentYear !== Number(input.season)) {
+        await redis.set(
+          `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
+          JSON.stringify(result),
+        );
+      } else {
         const thirtyMinutesInSeconds = 1800;
         await redis.set(
           `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
