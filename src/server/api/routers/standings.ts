@@ -1,6 +1,7 @@
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { type StandingsRoot } from "~/shared/types";
 import { z } from "zod";
+import { redis } from "~/lib/redis";
 
 export type Row = {
   club: string;
@@ -27,6 +28,12 @@ export type Row = {
   Total?: number;
 };
 
+type StandingsData = {
+  standings: StandingsRoot;
+  rows: Row[];
+  leagueName: string;
+};
+
 export const standingsRouter = createTRPCRouter({
   getStandings: publicProcedure
     .input(
@@ -36,6 +43,13 @@ export const standingsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
+      const cachedStandings = await redis.get(
+        `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
+      );
+      const currentYear = new Date().getFullYear();
+      if (cachedStandings) {
+        return JSON.parse(cachedStandings) as StandingsData;
+      }
       const response = await fetch(
         `https://api-football-standings.azharimm.dev/leagues/${input.leagueId}/standings?season=${input.season}&sort=asc`,
       );
@@ -50,10 +64,20 @@ export const standingsRouter = createTRPCRouter({
           ...stats,
         };
       });
-      return {
+      const result = {
         standings,
         rows: rows as Row[],
         leagueName: standings.data.name,
       };
+      if (currentYear !== Number(input.season)) {
+        const thirtyMinutesInSeconds = 1800;
+        await redis.set(
+          `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
+          JSON.stringify(result),
+          "EX",
+          thirtyMinutesInSeconds,
+        );
+      }
+      return result;
     }),
 });

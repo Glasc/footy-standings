@@ -1,3 +1,4 @@
+import { redis } from "~/lib/redis";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 const leagues = {
@@ -208,22 +209,55 @@ const leagues = {
 };
 
 export type Leagues = typeof leagues;
+type Result = {
+  leagues: {
+    status: boolean;
+    data: {
+      id: string;
+      name: string;
+      slug: string;
+      abbr: string;
+      logos: {
+        light: string;
+        dark: string;
+      };
+    }[];
+  };
+  comboData: {
+    value: string;
+    label: string;
+    id: `${string}.${number}`;
+    img_url: string;
+  }[];
+};
 
-export const leaguesRouter = createTRPCRouter({
-  getLeagues: publicProcedure.query(async () => {
-    const response = await fetch(
-      "https://api-football-standings.azharimm.dev/leagues",
-    );
-    const leagues = (await response.json()) as Leagues;
-    const exceptions = new Set(["idn.1", "mys.1", "sgp.1", "tha.1", "uga.1"]);
-    const comboData = leagues.data.map((league) => {
+const getComboData = (leagues: Leagues) => {
+  const exceptions = new Set(["idn.1", "mys.1", "sgp.1", "tha.1", "uga.1"]);
+  return leagues.data
+    .map((league) => {
       return {
         value: league.name.toLowerCase(),
         label: league.name,
         id: league.id as `${string}.${number}`,
         img_url: league.logos.dark ?? undefined,
       };
-    }).filter(league => !exceptions.has(league.id));
-    return { leagues, comboData };
+    })
+    .filter((league) => !exceptions.has(league.id));
+};
+
+export const leaguesRouter = createTRPCRouter({
+  getLeagues: publicProcedure.query(async () => {
+    const cachedLeagues = await redis.get(`${process.env.REDIS_KEY}.leagues`);
+    if (cachedLeagues) {
+      const result = JSON.parse(cachedLeagues) as Result;
+      return result;
+    }
+    const response = await fetch(
+      "https://api-football-standings.azharimm.dev/leagues",
+    );
+    const leagues = (await response.json()) as Leagues;
+    const result = { leagues, comboData: getComboData(leagues) };
+    await redis.set(`${process.env.REDIS_KEY}.leagues`, JSON.stringify(result));
+    return result;
   }),
 });

@@ -7,7 +7,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
       <Component {...pageProps} />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {process.env.ENV === "DEV" && <ReactQueryDevtools />}
     </>
   );
 };
