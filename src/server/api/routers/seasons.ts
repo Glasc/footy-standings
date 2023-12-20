@@ -11,8 +11,57 @@ type ComboData = {
   label: `${number}-${number}`;
 }[];
 
-// Extract the base URL to a constant for better maintainability
+type Seasons = {
+  seasons: Season[];
+  comboData: ComboData;
+};
+
 const BASE_URL = "https://api-football-standings.azharimm.dev/leagues";
+
+const getSeasonsFromCache = async () => {
+  const cachedSeasons = await redis.get(`${process.env.REDIS_KEY}.seasons`);
+  if (cachedSeasons) {
+    return JSON.parse(cachedSeasons) as {
+      seasons: Season[];
+      comboData: ComboData;
+    };
+  }
+};
+
+const getSeasons = async (leagueId: string) => {
+  const response = await fetch(`${BASE_URL}/${leagueId}/seasons`);
+  const data = (await response.json())  as {
+    data: {
+      seasons: Season[];
+    };
+  };
+  const seasons = data.data.seasons?.map((season) => ({
+    year: season.year,
+    fullYear: `${season.year}-${Number(season.year) + 1}`,
+  })) as Season[];
+  const comboData = data.data.seasons?.map((season) => {
+    return {
+      value: season.year.toString(),
+      label: `${season.year}-${Number(season.year) + 1}` as const,
+    };
+  });
+  return { seasons, comboData };
+};
+
+const saveSeasonsOnCache = async ({
+  seasons,
+  expiration,
+}: {
+  seasons: Seasons;
+  expiration: number;
+}) => {
+  await redis.set(
+    `${process.env.REDIS_KEY}.seasons`,
+    JSON.stringify(seasons),
+    "EX",
+    expiration,
+  );
+};
 
 export const seasonsRouter = createTRPCRouter({
   getSeasons: publicProcedure
@@ -22,37 +71,13 @@ export const seasonsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const cachedSeasons = await redis.get(`${process.env.REDIS_KEY}.seasons`);
+      const cachedSeasons = await getSeasonsFromCache();
       if (cachedSeasons) {
-        return JSON.parse(cachedSeasons) as {
-          seasons: Season[];
-          comboData: ComboData;
-        };
+        return cachedSeasons;
       }
-      const response = await fetch(`${BASE_URL}/${input.leagueId}/seasons`);
-      const data = (await response.json()) as {
-        data: {
-          seasons: Season[];
-        };
-      };
-      const seasons = data.data.seasons?.map((season) => ({
-        year: season.year,
-        fullYear: `${season.year}-${Number(season.year) + 1}`,
-      })) as Season[];
-      const comboData = data.data.seasons?.map((season) => {
-        return {
-          value: season.year.toString(),
-          label: `${season.year}-${Number(season.year) + 1}` as const,
-        };
-      });
-      const result = { seasons, comboData };
+      const seasons = await getSeasons(input.leagueId);
       const weekInSeconds = 604800;
-      await redis.set(
-        `${process.env.REDIS_KEY}.seasons`,
-        JSON.stringify(result),
-        "EX",
-        weekInSeconds,
-      );
-      return result;
+      await saveSeasonsOnCache({seasons, expiration: weekInSeconds})
+      return seasons;
     }),
 });
