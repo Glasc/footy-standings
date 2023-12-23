@@ -18,13 +18,17 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 
 type LeagueComboBoxProps = {
   leagues: {
     value: string;
     label: string;
     id: `${string}.${number}`;
-    img_url: string | undefined;
+    img_url: {
+      dark: string;
+      light: string;
+    };
   }[];
 };
 
@@ -34,6 +38,7 @@ export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
   const value = router.query.leagueId;
   const selectedLeague = leagues.find((league) => league.id === value);
   const leagueLabel = selectedLeague?.label;
+  const { theme } = useTheme();
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -69,7 +74,11 @@ export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
                         width={30}
                         height={30}
                         alt="League logo"
-                        src={league.img_url}
+                        src={
+                          theme === "dark"
+                            ? league?.img_url?.dark
+                            : league?.img_url?.light
+                        }
                       />
                     ) : null}
                     <span>{league.label}</span>

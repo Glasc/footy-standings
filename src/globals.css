@@ -11,7 +11,6 @@
 }
 
 html {
-  /* reserve space for navbar always  scroll clutter*/
   scrollbar-gutter: stable;
 }
 

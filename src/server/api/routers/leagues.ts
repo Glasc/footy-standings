@@ -227,7 +227,10 @@ type Result = {
     value: string;
     label: string;
     id: `${string}.${number}`;
-    img_url: string;
+    img_url: {
+      dark: string;
+      light: string;
+    };
   }[];
 };
 
@@ -239,7 +242,11 @@ const getComboData = (leagues: Leagues) => {
         value: league.name.toLowerCase(),
         label: league.name,
         id: league.id as `${string}.${number}`,
-        img_url: league.logos.dark ?? undefined,
+        img_url:
+          {
+            dark: league.logos?.dark,
+            light: league.logos?.light,
+          } ?? undefined,
       };
     })
     .filter((league) => !exceptions.has(league.id));
@@ -248,10 +255,10 @@ const getComboData = (leagues: Leagues) => {
 export const leaguesRouter = createTRPCRouter({
   getLeagues: publicProcedure.query(async () => {
     const cachedLeagues = await redis.get(`${process.env.REDIS_KEY}.leagues`);
-    if (cachedLeagues) {
-      const result = JSON.parse(cachedLeagues) as Result;
-      return result;
-    }
+    // if (cachedLeagues) {
+    //   const result = JSON.parse(cachedLeagues) as Result;
+    //   return result;
+    // }
     const response = await fetch(
       "https://api-football-standings.azharimm.dev/leagues",
     );

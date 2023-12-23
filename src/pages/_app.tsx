@@ -2,12 +2,20 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 import "../globals.css";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
-      <Component {...pageProps} />
-      {process.env.ENV === "DEV" && <ReactQueryDevtools />}
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Component {...pageProps} />
+        {process.env.ENV === "DEV" && <ReactQueryDevtools />}
+      </ThemeProvider>
     </>
   );
 };
