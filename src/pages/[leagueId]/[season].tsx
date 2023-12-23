@@ -74,7 +74,7 @@ export default function Season(params: SeasonProps) {
                   className="rounded-lg"
                   width={80}
                   height={80}
-                  alt="temp"
+                  alt="Current season image"
                   src={currentSeasonImg}
                   priority
                 />
