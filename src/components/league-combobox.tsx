@@ -68,7 +68,7 @@ export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
                       <Image
                         width={30}
                         height={30}
-                        alt="temp"
+                        alt="League logo"
                         src={league.img_url}
                       />
                     ) : null}

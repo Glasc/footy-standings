@@ -37,7 +37,7 @@ export const columns: ColumnDef<Row, unknown>[] = [
           <Image
             width={30}
             height={30}
-            alt="temp"
+            alt="Club logo"
             src={row.original.club_img.href}
           />
           <div>{row.original.club}</div>
