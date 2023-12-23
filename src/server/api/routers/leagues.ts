@@ -254,11 +254,11 @@ const getComboData = (leagues: Leagues) => {
 
 export const leaguesRouter = createTRPCRouter({
   getLeagues: publicProcedure.query(async () => {
-    // const cachedLeagues = await redis.get(`${process.env.REDIS_KEY}.leagues`);
-    // if (cachedLeagues) {
-    //   const result = JSON.parse(cachedLeagues) as Result;
-    //   return result;
-    // }
+    const cachedLeagues = await redis.get(`${process.env.REDIS_KEY}.leagues`);
+    if (cachedLeagues) {
+      const result = JSON.parse(cachedLeagues) as Result;
+      return result;
+    }
     const response = await fetch(
       "https://api-football-standings.azharimm.dev/leagues",
     );
