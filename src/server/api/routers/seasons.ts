@@ -30,22 +30,25 @@ const getSeasonsFromCache = async () => {
 
 const getSeasons = async (leagueId: string) => {
   const response = await fetch(`${BASE_URL}/${leagueId}/seasons`);
-  const data = (await response.json())  as {
+  const data = (await response.json()) as {
     data: {
       seasons: Season[];
     };
   };
-  const seasons = data.data.seasons?.map((season) => ({
-    year: season.year,
-    fullYear: `${season.year}-${Number(season.year) + 1}`,
-  })) as Season[];
-  const comboData = data.data.seasons?.map((season) => {
+  const seasons = data.data.seasons;
+  const seasonFormats = seasons?.map(({ year }) => {
     return {
-      value: season.year.toString(),
-      label: `${season.year}-${Number(season.year) + 1}` as const,
+      year,
+      fullYear: `${year}-${year + 1}`,
+    };
+  }) as Season[];
+  const comboData = seasons?.map(({ year }) => {
+    return {
+      value: year.toString(),
+      label: `${year}-${Number(year) + 1}` as const,
     };
   });
-  return { seasons, comboData };
+  return { seasons: seasonFormats, comboData };
 };
 
 const saveSeasonsOnCache = async ({
@@ -77,7 +80,7 @@ export const seasonsRouter = createTRPCRouter({
       }
       const seasons = await getSeasons(input.leagueId);
       const weekInSeconds = 604800;
-      await saveSeasonsOnCache({seasons, expiration: weekInSeconds})
+      await saveSeasonsOnCache({ seasons, expiration: weekInSeconds });
       return seasons;
     }),
 });

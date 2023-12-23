@@ -34,6 +34,55 @@ type StandingsData = {
   leagueName: string;
 };
 
+const getStandingsFromCache = async ({
+  leagueId,
+  season,
+}: {
+  leagueId: string;
+  season: string;
+}) => {
+  const cachedStandings = await redis.get(
+    `${process.env.REDIS_KEY}.standings.${leagueId}.${season}`,
+  );
+  if (cachedStandings) {
+    return JSON.parse(cachedStandings) as StandingsData;
+  }
+};
+
+const getStandings = async ({
+  leagueId,
+  season,
+}: {
+  leagueId: string;
+  season: string;
+}) => {
+  try {
+    const response = await fetch(
+      `https://api-football-standings.azharimm.dev/leagues/${leagueId}/standings?season=${season}&sort=asc`,
+    );
+    const standings = (await response.json()) as StandingsRoot;
+    const rows = standings?.data?.standings?.map((standing) => {
+      const stats = standing?.stats.reduce((acc, stat) => {
+        return { ...acc, [stat?.abbreviation]: stat?.value };
+      }, {});
+      const club_img = standing?.team?.logos?.[0] ?? {};
+      return {
+        club: standing?.team?.displayName,
+        club_img,
+        ...stats,
+      };
+    });
+    return {
+      standings,
+      rows: rows as Row[],
+      leagueName: standings.data.name,
+    };
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
 export const standingsRouter = createTRPCRouter({
   getStandings: publicProcedure
     .input(
@@ -43,46 +92,30 @@ export const standingsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const cachedStandings = await redis.get(
-        `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
-      );
-      const currentYear = new Date().getFullYear();
+      const cachedStandings = await getStandingsFromCache(input);
       if (cachedStandings) {
-        return JSON.parse(cachedStandings) as StandingsData;
+        return cachedStandings;
       }
-      const response = await fetch(
-        `https://api-football-standings.azharimm.dev/leagues/${input.leagueId}/standings?season=${input.season}&sort=asc`,
-      );
-      const standings = (await response.json()) as StandingsRoot;
-      const rows = standings.data.standings.map((standing) => {
-        const stats = standing.stats.reduce((acc, stat) => {
-          return { ...acc, [stat.abbreviation]: stat.value };
-        }, {});
-        return {
-          club: standing.team.displayName,
-          club_img: standing.team.logos[0],
-          ...stats,
-        };
-      });
-      const result = {
-        standings,
-        rows: rows as Row[],
-        leagueName: standings.data.name,
-      };
-      if (currentYear !== Number(input.season)) {
-        await redis.set(
-          `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
-          JSON.stringify(result),
-        );
+      const currentYear = new Date().getFullYear();
+      const standings = await getStandings(input);
+
+      if (!standings || !("standings" in standings)) {
+        return {};
+      }
+
+      const isCurrentYearRequested = currentYear !== Number(input.season);
+      const key = `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`;
+      if (isCurrentYearRequested) {
+        await redis.set(key, JSON.stringify(standings));
       } else {
         const thirtyMinutesInSeconds = 1800;
         await redis.set(
-          `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`,
-          JSON.stringify(result),
+          key,
+          JSON.stringify(standings),
           "EX",
           thirtyMinutesInSeconds,
         );
       }
-      return result;
+      return standings;
     }),
 });
