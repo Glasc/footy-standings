@@ -43,7 +43,7 @@ export default function Season(params: SeasonProps) {
         <div className="mx-auto w-full max-w-5xl px-2">
           <div className="flex items-center justify-between">
             <div className="flex flex-col sm:items-center sm:flex-row space-x-0 lg:space-x-5">
-              <div className="">
+              <div>
                 {leagues.isLoading ? (
                   <Skeleton className="h-[80px] w-[80px] rounded-full" />
                 ) : currentSeasonImg ? (
