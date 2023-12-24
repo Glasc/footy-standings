@@ -16,7 +16,6 @@ const useThemeChange = () => {
 
 export function ModeToggle() {
   const { setTheme, currentTheme } = useThemeChange();
-  if (currentTheme === "") return null;
   switch (currentTheme) {
     case "dark":
       return (
