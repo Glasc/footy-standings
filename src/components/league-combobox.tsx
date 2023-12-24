@@ -46,7 +46,7 @@ export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[400px] justify-between  font-semibold sm:text-xl"
+          className="w-full max-w-[280px] sm:max-w-[400px] justify-between  font-semibold sm:text-xl"
         >
           {value ? <span>{leagueLabel}</span> : "Select league..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />

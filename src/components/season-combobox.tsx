@@ -36,7 +36,7 @@ export function SeasonComboBox({ seasons }: SeasonComboBoxProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-auto max-w-[400px] justify-between text-base  font-semibold sm:text-xl"
+          className="w-full max-w-[280px] sm:max-w-[300px]  justify-between text-base  font-semibold sm:text-xl"
         >
           {value
             ? seasons.find((season) => season.value === value)?.label

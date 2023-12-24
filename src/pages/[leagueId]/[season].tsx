@@ -42,13 +42,13 @@ export default function Season(params: SeasonProps) {
         <div className="absolute left-8 top-8"></div>
         <div className="mx-auto w-full max-w-5xl px-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-5">
-              <div>
+            <div className="flex flex-col sm:items-center sm:flex-row space-x-0 lg:space-x-5">
+              <div className="">
                 {leagues.isLoading ? (
                   <Skeleton className="h-[80px] w-[80px] rounded-full" />
                 ) : currentSeasonImg ? (
                   <Image
-                    className="rounded-lg"
+                    className="mx-auto hidden w-full max-w-[80px] rounded-lg lg:block"
                     width={80}
                     height={80}
                     alt="Current season image"
@@ -61,7 +61,7 @@ export default function Season(params: SeasonProps) {
                   />
                 ) : null}
               </div>
-              <div className="space-y-1">
+              <div className="sm:space-y-1">
                 <span className="block font-semibold text-muted-foreground">
                   League:
                 </span>
@@ -73,7 +73,7 @@ export default function Season(params: SeasonProps) {
                   <LeagueComboBox leagues={leagues.data?.comboData ?? []} />
                 )}
               </div>
-              <div className="space-y-1">
+              <div className="sm:space-y-1">
                 <span className="block font-semibold text-muted-foreground">
                   Season:
                 </span>
