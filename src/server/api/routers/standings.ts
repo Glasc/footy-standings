@@ -45,10 +45,8 @@ const getStandingsFromCache = async ({
     `${process.env.REDIS_KEY}.standings.${leagueId}.${season}`,
   );
   if (cachedStandings) {
-    await redis.quit();
     return JSON.parse(cachedStandings) as StandingsData;
   }
-  await redis.quit();
 };
 
 const getStandings = async ({
@@ -109,7 +107,6 @@ export const standingsRouter = createTRPCRouter({
       const key = `${process.env.REDIS_KEY}.standings.${input.leagueId}.${input.season}`;
       if (isCurrentYearRequested) {
         await redis.set(key, JSON.stringify(standings));
-        await redis.quit();
       } else {
         const thirtyMinutesInSeconds = 1800;
         await redis.set(
@@ -118,7 +115,6 @@ export const standingsRouter = createTRPCRouter({
           "EX",
           thirtyMinutesInSeconds,
         );
-        await redis.quit();
       }
       return standings;
     }),

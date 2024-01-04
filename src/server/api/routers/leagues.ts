@@ -62,7 +62,6 @@ export const leaguesRouter = createTRPCRouter({
     const cachedLeagues = await redis.get(`${process.env.REDIS_KEY}.leagues`);
     if (cachedLeagues) {
       const result = JSON.parse(cachedLeagues) as Result;
-      await redis.quit();
       return result;
     }
     const response = await fetch(
@@ -71,7 +70,6 @@ export const leaguesRouter = createTRPCRouter({
     const leagues = (await response.json()) as Leagues;
     const result = { leagues, comboData: getComboData(leagues) };
     await redis.set(`${process.env.REDIS_KEY}.leagues`, JSON.stringify(result));
-    await redis.quit();
     return result;
   }),
 });

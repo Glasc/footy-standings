@@ -21,7 +21,6 @@ const BASE_URL = "https://api-football-standings.azharimm.dev/leagues";
 const getSeasonsFromCache = async () => {
   const cachedSeasons = await redis.get(`${process.env.REDIS_KEY}.seasons`);
   if (cachedSeasons) {
-    await redis.quit()
     return JSON.parse(cachedSeasons) as {
       seasons: Season[];
       comboData: ComboData;
@@ -65,7 +64,6 @@ const saveSeasonsOnCache = async ({
     "EX",
     expiration,
   );
-  await redis.quit()
 };
 
 export const getSeasons = async (leagueId: string) => {
