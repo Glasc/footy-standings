@@ -28,7 +28,7 @@ const getSeasonsFromCache = async () => {
   }
 };
 
-const getSeasons = async (leagueId: string) => {
+const getSeasonsFromApi = async (leagueId: string) => {
   const response = await fetch(`${BASE_URL}/${leagueId}/seasons`);
   const data = (await response.json()) as {
     data: {
@@ -66,6 +66,17 @@ const saveSeasonsOnCache = async ({
   );
 };
 
+export const getSeasons = async (leagueId: string) => {
+  const cachedSeasons = await getSeasonsFromCache();
+  if (cachedSeasons) {
+    return cachedSeasons;
+  }
+  const seasons = await getSeasonsFromApi(leagueId);
+  const weekInSeconds = 604800;
+  await saveSeasonsOnCache({ seasons, expiration: weekInSeconds });
+  return seasons;
+};
+
 export const seasonsRouter = createTRPCRouter({
   getSeasons: publicProcedure
     .input(
@@ -74,13 +85,7 @@ export const seasonsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const cachedSeasons = await getSeasonsFromCache();
-      if (cachedSeasons) {
-        return cachedSeasons;
-      }
       const seasons = await getSeasons(input.leagueId);
-      const weekInSeconds = 604800;
-      await saveSeasonsOnCache({ seasons, expiration: weekInSeconds });
       return seasons;
     }),
 });

@@ -21,6 +21,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 
 type LeagueComboBoxProps = {
+  currentSeason: number | undefined;
   leagues: {
     value: string;
     label: string;
@@ -32,7 +33,10 @@ type LeagueComboBoxProps = {
   }[];
 };
 
-export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
+export function LeagueComboBox({
+  leagues,
+  currentSeason,
+}: LeagueComboBoxProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const value = router.query.leagueId;
@@ -46,7 +50,7 @@ export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full max-w-[280px] sm:max-w-[400px] justify-between  font-semibold sm:text-xl"
+          className="w-full max-w-[280px] justify-between font-semibold  sm:max-w-[400px] sm:text-xl"
         >
           {value ? <span>{leagueLabel}</span> : "Select league..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -58,9 +62,11 @@ export function LeagueComboBox({ leagues }: LeagueComboBoxProps) {
           <CommandEmpty>No league found.</CommandEmpty>
           <CommandGroup>
             {leagues.map((league) => {
-              const currentYear = new Date().getFullYear();
               return (
-                <Link href={`/${league.id}/${currentYear}`} key={league.value}>
+                <Link
+                  href={`/${league.id}/${currentSeason}`}
+                  key={league.value}
+                >
                   <CommandItem
                     className="space-x-2 font-medium"
                     key={league.value}

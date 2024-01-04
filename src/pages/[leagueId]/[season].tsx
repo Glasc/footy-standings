@@ -24,7 +24,8 @@ const useStandings = ({ leagueId, season }: SeasonProps) => {
 };
 const useLeagues = () => api.leagues.getLeagues.useQuery();
 const useSeasons = (season: SeasonProps["season"]) => {
-  return api.seasons.getSeasons.useQuery({ leagueId: season });
+  const seasons = api.seasons.getSeasons.useQuery({ leagueId: season });
+  return { ...seasons, lastSeason: seasons.data?.seasons[0]?.year };
 };
 
 export default function Season(params: SeasonProps) {
@@ -42,7 +43,7 @@ export default function Season(params: SeasonProps) {
         <div className="absolute left-8 top-8"></div>
         <div className="mx-auto w-full max-w-5xl px-2">
           <div className="flex items-center justify-between">
-            <div className="flex flex-col sm:items-center sm:flex-row space-x-0 lg:space-x-5">
+            <div className="flex flex-col space-x-0 sm:flex-row sm:items-center lg:space-x-5">
               <div className="">
                 {leagues.isLoading ? (
                   <Skeleton className="h-[80px] w-[80px] rounded-full" />
@@ -70,7 +71,10 @@ export default function Season(params: SeasonProps) {
                     <Skeleton className="h-[40px] w-[400px] rounded-full" />
                   </>
                 ) : (
-                  <LeagueComboBox leagues={leagues.data?.comboData ?? []} />
+                  <LeagueComboBox
+                    currentSeason={seasons.lastSeason}
+                    leagues={leagues.data?.comboData ?? []}
+                  />
                 )}
               </div>
               <div className="sm:space-y-1">
