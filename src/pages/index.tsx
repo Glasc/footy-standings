@@ -1,4 +1,5 @@
 import { type GetServerSideProps } from "next";
+import { getSeasons } from "~/server/api/routers/seasons";
 
 export default function Home() {
   return (
@@ -9,10 +10,11 @@ export default function Home() {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const currentYear = new Date().getFullYear();
+  const seasons = await getSeasons("eng.1");
+  const currentSeason = seasons.seasons[0]?.year;
   return {
     redirect: {
-      destination: `/eng.1/${currentYear}`,
+      destination: `/eng.1/${currentSeason}`,
       permanent: true,
     },
   };
