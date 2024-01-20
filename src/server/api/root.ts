@@ -6,7 +6,7 @@ import { seasonsRouter } from "./routers/seasons";
 export const appRouter = createTRPCRouter({
   standings: standingsRouter,
   leagues: leaguesRouter,
-  seasons: seasonsRouter
+  seasons: seasonsRouter,
 });
 
 // export type definition of API

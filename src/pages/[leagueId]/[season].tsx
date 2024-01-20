@@ -5,10 +5,10 @@ import { BaseHead } from "~/components/base-head";
 import { LeagueComboBox } from "~/components/league-combobox";
 import { SeasonComboBox } from "~/components/season-combobox";
 import { columns } from "~/components/table/columns";
-import { DataTable } from "~/components/table/data-table";
 import { ModeToggle } from "~/components/theme-toggle";
-import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/utils/api";
+import {Skeleton} from "~/components/ui/skeleton";
+import {DataTable} from "~/components/table/data-table";
 
 type SeasonProps = {
   leagueId: string;
@@ -24,7 +24,7 @@ const useStandings = ({ leagueId, season }: SeasonProps) => {
 };
 const useLeagues = () => api.leagues.getLeagues.useQuery();
 const useSeasons = (season: SeasonProps["season"]) => {
-  const seasons = api.seasons.getSeasons.useQuery({ leagueId: season });
+  const seasons = api.seasons.getSeasons.useQuery({ leagueId: season })
   return { ...seasons, lastSeason: seasons.data?.seasons[0]?.year };
 };
 

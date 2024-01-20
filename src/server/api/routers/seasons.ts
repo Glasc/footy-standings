@@ -58,12 +58,14 @@ const saveSeasonsOnCache = async ({
   seasons: Seasons;
   expiration: number;
 }) => {
-  await redis.set(
-    `${process.env.REDIS_KEY}.seasons`,
-    JSON.stringify(seasons),
-    "EX",
-    expiration,
-  );
+  if (Object.keys(seasons).length > 0) {
+    await redis.set(
+      `${process.env.REDIS_KEY}.seasons`,
+      JSON.stringify(seasons),
+      "EX",
+      expiration,
+    );
+  }
 };
 
 export const getSeasons = async (leagueId: string) => {
@@ -72,8 +74,8 @@ export const getSeasons = async (leagueId: string) => {
     return cachedSeasons;
   }
   const seasons = await getSeasonsFromApi(leagueId);
-  const weekInSeconds = 604800;
-  await saveSeasonsOnCache({ seasons, expiration: weekInSeconds });
+  const monthInSeconds = 30 * 24 * 60 * 60;
+  await saveSeasonsOnCache({ seasons, expiration: monthInSeconds });
   return seasons;
 };
 
@@ -85,7 +87,6 @@ export const seasonsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const seasons = await getSeasons(input.leagueId);
-      return seasons;
+      return await getSeasons(input.leagueId);
     }),
 });
